@@ -1,7 +1,10 @@
 package org.example;
 
+import de.vandermeer.asciitable.AsciiTable;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeParseException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Scanner;
@@ -197,6 +200,7 @@ public class Main {
             System.out.println("3) Year To Date");
             System.out.println("4) Previous Year");
             System.out.println("5) Search by Vendor");
+            System.out.println("6) Custom Search");
             System.out.println("0) Back");
             System.out.print("Select an option: ");
 
@@ -253,18 +257,84 @@ public class Main {
                     displayTransactions(results);
                     break;
                 }
+                case "6":
+                    runCustomSearch(scanner);
+                    break;
 
                 case "0":
                     reportsOpen = false;
                     break;
 
                 default:
-                    System.out.println("Invalid option. Please enter 0-5.");
+                    System.out.println("Invalid option. Please enter 0, 1, 2, 3, 4, 5, or 6.");
                     break;
             }
         }
     }
 
+    // ─── Custom Search Engine ──────────────────────────────────────────────────
+
+    private static void runCustomSearch(Scanner scanner) {
+        System.out.println("\n--- Custom Search ---");
+        System.out.println("(Press Enter to skip any field)");
+
+        LocalDate startDate = null;
+        System.out.print("Start Date (YYYY-MM-DD): ");
+        String startInput = scanner.nextLine().trim();
+        if (!startInput.isEmpty()) {
+            try {
+                startDate = LocalDate.parse(startInput);
+            } catch (DateTimeParseException e) {
+                System.out.println("Invalid date format. Skipping start date filter.");
+            }
+        }
+
+        LocalDate endDate = null;
+        System.out.print("End Date (YYYY-MM-DD): ");
+        String endInput = scanner.nextLine().trim();
+        if (!endInput.isEmpty()) {
+            try {
+                endDate = LocalDate.parse(endInput);
+            } catch (DateTimeParseException e) {
+                System.out.println("Invalid date format. Skipping end date filter.");
+            }
+        }
+
+        System.out.print("Description: ");
+        String descInput = scanner.nextLine().trim();
+
+        System.out.print("Vendor: ");
+        String vendorInput = scanner.nextLine().trim();
+
+        Double targetAmount = null;
+        System.out.print("Amount: ");
+        String amountInput = scanner.nextLine().trim();
+        if (!amountInput.isEmpty()) {
+            try {
+                targetAmount = Double.parseDouble(amountInput);
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid amount format. Skipping amount filter.");
+            }
+        }
+
+        List<Transaction> allTransactions = FileManager.getTransactions();
+
+        final LocalDate finalStart = startDate;
+        final LocalDate finalEnd = endDate;
+        final Double finalAmount = targetAmount;
+
+        List<Transaction> filteredResults = allTransactions.stream()
+                .filter(t -> finalStart == null || !t.getDate().isBefore(finalStart))
+                .filter(t -> finalEnd == null || !t.getDate().isAfter(finalEnd))
+                .filter(t -> descInput.isEmpty() || t.getDescription().toLowerCase().contains(descInput.toLowerCase()))
+                .filter(t -> vendorInput.isEmpty() || t.getVendor().toLowerCase().contains(vendorInput.toLowerCase()))
+                .filter(t -> finalAmount == null || Math.abs(t.getAmount() - finalAmount) < 0.001)
+                .collect(Collectors.toList());
+
+        System.out.println("\n--- Custom Search Results ---");
+        displayTransactions(filteredResults);
+        displayFormat(allTransactions);
+    }
     // ─── Helpers ─────────────────────────────────────────────────────────────────
 
     public static void displayTransactions(List<Transaction> transactions) {
@@ -291,5 +361,31 @@ public class Main {
         return transactions.stream()
                 .filter(t -> !t.getDate().isBefore(start) && !t.getDate().isAfter(end))
                 .collect(Collectors.toList());
+    }
+    public static void displayFormat(List<Transaction> transactions) {
+
+        AsciiTable at = new AsciiTable();
+
+        // Header
+        at.addRule();
+        //Add the table header
+        at.addRow("Date", "Time", "Description", "Vendor", "Amount");
+        at.addRule();
+
+        // Rows
+        for (Transaction t : transactions) {
+            at.addRow(
+                    t.getDate(),
+                    t.getTime(),
+                    t.getDescription(),
+                    t.getVendor(),
+                    String.format("%.2f", t.getAmount())
+            );
+
+            at.addRule();
+        }
+
+        // Print table
+        System.out.println(at.render());
     }
 }
