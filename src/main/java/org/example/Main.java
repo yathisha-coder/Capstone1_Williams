@@ -152,7 +152,7 @@ public class Main {
 
             switch (ledgerOption) {
                 case "A":
-                    displayTransactions(FileManager.getTransactions());
+                    displayFormat(FileManager.getTransactions());
                     break;
 
                 case "D":
@@ -160,7 +160,7 @@ public class Main {
                             .filter(t -> t.getAmount() > 0)
                             .collect(Collectors.toList());
                     System.out.println("\n--- Deposits ---");
-                    displayTransactions(deposits);
+                    displayFormat(deposits);
                     break;
 
                 case "P":
@@ -168,7 +168,7 @@ public class Main {
                             .filter(t -> t.getAmount() < 0)
                             .collect(Collectors.toList());
                     System.out.println("\n--- Payments ---");
-                    displayTransactions(payments);
+                    displayFormat(payments);
                     break;
 
                 case "R":
@@ -214,7 +214,7 @@ public class Main {
                     LocalDate startOfMonth = today.withDayOfMonth(1);
                     List<Transaction> results = filterByDateRange(FileManager.getTransactions(), startOfMonth, today);
                     System.out.println("\n--- Month To Date ---");
-                    displayTransactions(results);
+                    displayFormat(results);
                     break;
                 }
 
@@ -224,7 +224,7 @@ public class Main {
                     LocalDate lastOfPrevMonth = firstOfPrevMonth.withDayOfMonth(firstOfPrevMonth.lengthOfMonth());
                     List<Transaction> results = filterByDateRange(FileManager.getTransactions(), firstOfPrevMonth, lastOfPrevMonth);
                     System.out.println("\n--- Previous Month ---");
-                    displayTransactions(results);
+                    displayFormat(results);
                     break;
                 }
 
@@ -233,7 +233,7 @@ public class Main {
                     LocalDate startOfYear = today.withDayOfYear(1);
                     List<Transaction> results = filterByDateRange(FileManager.getTransactions(), startOfYear, today);
                     System.out.println("\n--- Year To Date ---");
-                    displayTransactions(results);
+                    displayFormat(results);
                     break;
                 }
 
@@ -243,7 +243,7 @@ public class Main {
                     LocalDate endOfPrevYear = startOfPrevYear.withDayOfYear(startOfPrevYear.lengthOfYear());
                     List<Transaction> results = filterByDateRange(FileManager.getTransactions(), startOfPrevYear, endOfPrevYear);
                     System.out.println("\n--- Previous Year ---");
-                    displayTransactions(results);
+                    displayFormat(results);
                     break;
                 }
 
@@ -254,7 +254,7 @@ public class Main {
                             .filter(t -> t.getVendor().toLowerCase().contains(vendorSearch))
                             .collect(Collectors.toList());
                     System.out.println("\n--- Vendor Search: " + vendorSearch + " ---");
-                    displayTransactions(results);
+                    displayFormat(results);
                     break;
                 }
                 case "6":
@@ -332,12 +332,12 @@ public class Main {
                 .collect(Collectors.toList());
 
         System.out.println("\n--- Custom Search Results ---");
-        displayTransactions(filteredResults);
+        //displayTransactions(filteredResults);
         displayFormat(allTransactions);
     }
     // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-    public static void displayTransactions(List<Transaction> transactions) {
+    /*public static void displayTransactions(List<Transaction> transactions) {
         if (transactions.isEmpty()) {
             System.out.println("No transactions found.");
             return;
@@ -355,7 +355,7 @@ public class Main {
         for (Transaction t : transactions) {
             System.out.println(t);
         }
-    }
+            }*/
 
     public static List<Transaction> filterByDateRange(List<Transaction> transactions, LocalDate start, LocalDate end) {
         return transactions.stream()
